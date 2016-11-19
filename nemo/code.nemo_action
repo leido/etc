@@ -1,0 +1,13 @@
+[Nemo Action]
+
+Active=true
+
+Name=Code Here
+
+Exec=code %P
+
+Icon-Name=code
+
+Selection=none
+
+Extensions=dir
