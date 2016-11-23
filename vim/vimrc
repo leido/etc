@@ -1,0 +1,103 @@
+" pathogen
+execute pathogen#infect()
+
+autocmd! bufwritepost .vimrc source ~/.vimrc
+
+" Color scheme
+set t_Co=256
+let g:rehash256=1
+let g:molokai_original=0
+colorscheme molokai
+
+if has("gui_running")
+    set guioptions-=m
+    set guioptions-=T
+    set guioptions-=r
+    set guioptions=L
+    set columns=100 lines=40
+    set guifont=Noto\ Mono\ Regular\ 11
+    colorscheme desert
+endif
+
+"set file encoding
+set fileencoding=utf-8
+set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936
+
+
+"set basedir
+set bsdir=buffer
+
+" Configure backspace so it acts as it should act
+set backspace=eol,start,indent
+set whichwrap+=<,>,h,l
+
+" 显示行号
+set number
+
+" 语法高亮
+syntax on
+
+" 自动载入修改文件
+set autoread
+
+" 高亮当前行
+set cursorline
+
+
+set nocompatible
+
+" set autoindent
+" set smartindent
+
+" tab设置
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set smarttab
+
+" 不使用历史文件
+set nobackup
+set statusline=\ [%F]%m%r%h%w%=[Line:%l/%L,Column:%c][%p%%]
+
+set laststatus=2
+set cmdheight=1
+
+" 载入文件类型插件
+filetype on
+filetype plugin on
+filetype indent on
+syntax enable
+
+" 显示匹配的括号
+set showmatch
+
+" 在左边添加一列
+set foldcolumn=1
+
+" 返回之前编辑所在位置
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+
+" 高亮搜索
+set hlsearch
+
+" With a map leader it's possible to do extra key combinations
+" like <leader>w saves the current file
+let mapleader = ","
+let g:mapleader = ","
+
+" Fast saving
+nmap <leader>w :w!<cr>
+
+" :W sudo saves the file 
+" (useful for handling the permission-denied error)
+" command W w !sudo tee % > /dev/null
+
+" Disable highlight when <leader><cr> is pressed
+map <silent> <leader><cr> :noh<cr>
+map <leader>v "+p<cr>
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""
+" BufExplorer
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:bufExplorerDefaultHelp=0
+let g:bufExplorerSortBy='mru'
