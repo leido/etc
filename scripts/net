@@ -11,8 +11,8 @@ base_url = "http://159.226.39.22/cgi-bin/"
 
 
 values = {
-    "username": "dulei",
-    "password": "dulei001",
+    "username": "****",
+    "password": "****",
 }
 
 
