@@ -1,19 +1,50 @@
-set guioptions ""
+set guioptions "v"
 set window-height 1080
-set window-width 1920
+set window-width 1400
 set adjust-open width
+set selection-clipboard clipboard
 
 
 map [normal] f toggle_fullscreen
 map [fullscreen] f toggle_fullscreen
 
-map [normal] - zoom out
-map [fullscreen] - zoom out
+map [normal] a zoom out
+map [fullscreen] a zoom out
 
-map [normal] = zoom in
-map [fullscreen] = zoom in
+map [normal] s zoom in
+map [fullscreen] s zoom in
+
+map [normal] v follow 
+map [fullscreen] v follow 
+
+map [normal] = adjust-open best-fit
+map [fullscreen] = adjust-open best-fit
 
 map [fullscreen] <Space> scroll half-down
 map [normal] <Space> scroll half-down
 
+set default-bg                  "#FFFFFF"
+
+set window-title-basename       "true"
+set window-title-page           "true"
+
+set statusbar-fg                "#303030" #02
+set statusbar-bg                "#B0B0B0" #04
+
+
+set notification-error-bg       "#AC4142" #08
+set notification-error-fg       "#E0E0E0" #06
+
+set notification-warning-bg     "#AC4142" #08
+set notification-warning-fg     "#E0E0E0" #06
+
+set highlight-color             "#F4BF75" #0A
+set highlight-active-color      "#AA759F" #08
+
+set completion-highlight-fg     "#D0D0D0" #05
+set completion-highlight-bg     "#75B5AA" #0C
+
+
+set notification-bg             "#90A959" #0B
+set notification-fg             "#F5F5F5" #07
 
