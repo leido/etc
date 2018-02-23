@@ -96,8 +96,3 @@ nmap <leader>w :w!<cr>
 map <silent> <leader><cr> :noh<cr>
 map <leader>v "+p<cr>
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""
-" BufExplorer
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:bufExplorerDefaultHelp=0
-let g:bufExplorerSortBy='mru'
