@@ -1,0 +1,4 @@
+[style]
+coalesce_brackets = true
+no_spaces_around_selected_binary_operators = *,/
+spaces_before_comment = 1
