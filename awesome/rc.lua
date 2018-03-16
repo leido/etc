@@ -14,6 +14,18 @@ local menubar = require("menubar")
 -- Load Debian menu entries
 require("debian.menu")
 
+function run_once(cmd)
+  findme = cmd
+  firstspace = cmd:find(" ")
+  if firstspace then
+    findme = cmd:sub(0, firstspace-1)
+  end
+  awful.util.spawn_with_shell("pgrep -u $USER -x " .. findme .. " > /dev/null || (" .. cmd .. ")")
+end
+
+run_once("goldendict")
+run_once("ss-qt5")
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -41,12 +53,13 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-beautiful.init("/usr/share/awesome/themes/zenburn/theme.lua")
+-- beautiful.init("/usr/share/awesome/themes/default/theme.lua")
+beautiful.init(awful.util.getdir("config") .. "/themes/bamboo/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "xterm"
-editor = "subl"
-editor_cmd = terminal .. "-hold -e " .. editor
+terminal = "x-terminal-emulator"
+editor = os.getenv("EDITOR") or "vim"
+editor_cmd = terminal .. " -e " .. editor
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -58,10 +71,9 @@ modkey = "Mod4"
 -- Table of layouts to cover with awful.layout.inc, order matters.
 local layouts =
 {
-    awful.layout.suit.tile,
-    
+    awful.layout.suit.tile.left,
     awful.layout.suit.fair,
-    -- awful.layout.suit.floating,
+    awful.layout.suit.spiral,
     awful.layout.suit.max,
 }
 -- }}}
@@ -76,29 +88,27 @@ end
 
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
-tags = {
-	names = {"main", "shell", "www", "others"},
-	layout = {layouts[1], layouts[2], layouts[3], layouts[3]}
-}
-for s = 1, screen.count() do
-    -- Each screen has its own tag table.
-    tags[s] = awful.tag(tags.names, s, tags.layout)
-end
+tags = {}
+-- for s = 1, screen.count() do
+--     -- Each screen has its own tag table.
+--     tags[s] = awful.tag({ 1, 2 }, s, layouts[1])
+-- end
+tags[1] = awful.tag({"show"}, 2, {layouts[4]})
+tags[2] = awful.tag({"code |", "www |", "shell |", "nemo |", "others"}, 1, {layouts[4], layouts[4], layouts[2], layouts[2], layouts[4]})
 -- }}}
 
 -- {{{ Menu
 -- Create a laucher widget and a main menu
 myawesomemenu = {
-   { "manual", terminal .. " -e man awesome" },
    { "edit config", editor_cmd .. " " .. awesome.conffile },
+   { "manual", terminal .. " -e man awesome" },
    { "restart", awesome.restart },
    { "quit", awesome.quit }
 }
 
 mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    --{ "Debian", debian.menu.Debian_menu.Debian },
-                                    { "Home", "nemo", theme.home_icon },
-                                    { "Chrome", "google-chrome" }
+                                    { "Debian", debian.menu.Debian_menu.Debian },
+                                    { "open terminal", terminal }
                                   }
                         })
 
@@ -230,6 +240,9 @@ globalkeys = awful.util.table.join(
             if client.focus then client.focus:raise() end
         end),
     awful.key({ modkey,           }, "w", function () mymainmenu:show() end),
+    awful.key({ modkey,           }, "e", function () awful.util.spawn("nemo") end),
+    awful.key({ modkey,           }, "g", function () awful.util.spawn("google-chrome") end),
+    awful.key({ "Mod1", "Control" }, "l",     function () awful.util.spawn("gnome-screensaver-command --lock") end),
 
     -- Layout manipulation
     awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end),
@@ -362,12 +375,24 @@ awful.rules.rules = {
                      buttons = clientbuttons } },
     { rule = { class = "mpv" },
       properties = { floating = true } },
-    { rule = { class = "GoldenDict" },
+    { rule = { class = "Goldendict" },
+      properties = { floating = true },
+      callback = function( c )
+                    c:geometry( { width = 800, height = 600 } )
+                 end},
+    { rule = { class = "gimp" },
       properties = { floating = true } },
-      { rule = { class = "XTerm" }, properties = { tag = tags[2][2] } },
     -- Set Firefox to always map on tags number 2 of screen 1.
+    -- { rule = { class = "Firefox" },
+    --   properties = { tag = tags[1][2] } },
+    { rule = { class = "Code" },
+      properties = { tag = tags[2][1] } },
     { rule = { class = "Google-chrome" },
-      properties = { tag = tags[1][3] } }
+      properties = { tag = tags[2][2] } },
+    { rule = { class = "Gnome-terminal" },
+      properties = { tag = tags[2][3] } },
+    { rule = { class = "Nemo" },
+      properties = { tag = tags[2][4] } },
 }
 -- }}}
 
