@@ -10,7 +10,7 @@ local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
-
+local fixwidthtextbox = require("fixwidthtextbox")
 -- Load Debian menu entries
 require("debian.menu")
 
@@ -51,10 +51,25 @@ do
 end
 -- }}}
 
+
+local ok, localconf = pcall(require, "local")
+if ok and localconf.scale then
+  scale = localconf.scale
+else
+  scale = 1
+end
+
+if scale ~= 1 then
+  local dpi = 96 * scale
+  require("lgi").PangoCairo.FontMap.get_default():set_resolution(dpi)
+  awful.util.spawn("xrandr --dpi " .. dpi, false)
+end
+
+
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 -- beautiful.init("/usr/share/awesome/themes/default/theme.lua")
-beautiful.init(awful.util.getdir("config") .. "/themes/bamboo/theme.lua")
+beautiful.init(awful.util.getdir("config") .. "/themes/dk-grey/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "x-terminal-emulator"
@@ -93,9 +108,64 @@ tags = {}
 --     -- Each screen has its own tag table.
 --     tags[s] = awful.tag({ 1, 2 }, s, layouts[1])
 -- end
-tags[1] = awful.tag({"show"}, 2, {layouts[4]})
-tags[2] = awful.tag({"code |", "www |", "shell |", "nemo |", "others"}, 1, {layouts[4], layouts[4], layouts[2], layouts[2], layouts[4]})
+tags[1] = awful.tag({"shell |", "code |", "nemo |", "fun"}, 1, {layouts[2], layouts[4], layouts[2], layouts[4]})
+tags[2] = awful.tag({"show |", "doc"}, 2, {layouts[4], layouts[4]})
 -- }}}
+
+-- {{{ Volume Controller
+function volumectl (mode, widget)
+    if mode == "update" then
+        local f = io.popen("pamixer --get-volume")
+        local volume = f:read("*all")
+        f:close()
+        if not tonumber(volume) then
+            widget:set_markup("<span color='red'>ERR</span>")
+            do return end
+        end
+        volume = string.format("% 3d", volume)
+
+        f = io.popen("pamixer --get-mute")
+        local muted = f:read("*all")
+        f:close()
+        if muted:gsub('%s+', '') == "false" then
+            volume = '♫' .. volume .. "%"
+        else
+            volume = '♫' .. volume .. "<span color='red'>M</span>"
+        end
+        widget:set_markup(volume)
+    elseif mode == "up" then
+        local f = io.popen("pamixer --allow-boost --increase 5")
+        f:read("*all")
+        f:close()
+        volumectl("update", widget)
+    elseif mode == "down" then
+        local f = io.popen("pamixer --allow-boost --decrease 5")
+        f:read("*all")
+        f:close()
+        volumectl("update", widget)
+    else
+        local f = io.popen("pamixer --toggle-mute")
+        f:read("*all")
+        f:close()
+        volumectl("update", widget)
+    end
+end
+volume_clock = timer({ timeout = 10 })
+volume_clock:connect_signal("timeout", function () volumectl("update", volumewidget) end)
+volume_clock:start()
+
+volumewidget = fixwidthtextbox('(volume)')
+volumewidget.width = 48 * scale
+volumewidget:set_align('right')
+volumewidget:buttons(awful.util.table.join(
+    awful.button({ }, 4, function () volumectl("up", volumewidget) end),
+    awful.button({ }, 5, function () volumectl("down", volumewidget) end),
+    awful.button({ }, 3, function () awful.util.spawn("pavucontrol") end),
+    awful.button({ }, 1, function () volumectl("mute", volumewidget) end)
+))
+volumectl("update", volumewidget)
+--}}}
+
 
 -- {{{ Menu
 -- Create a laucher widget and a main menu
@@ -203,6 +273,7 @@ for s = 1, screen.count() do
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(mytextclock)
+    right_layout:add(volumewidget)
     right_layout:add(mylayoutbox[s])
 
     -- Now bring it all together (with the tasklist in the middle)
@@ -242,21 +313,22 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "w", function () mymainmenu:show() end),
     awful.key({ modkey,           }, "e", function () awful.util.spawn("nemo") end),
     awful.key({ modkey,           }, "g", function () awful.util.spawn("google-chrome") end),
+    awful.key({ modkey,           }, "n", function () awful.util.spawn("netease-cloud-music") end),
     awful.key({ "Mod1", "Control" }, "l",     function () awful.util.spawn("gnome-screensaver-command --lock") end),
 
     -- Layout manipulation
     awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end),
     awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx( -1)    end),
-    awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end),
-    awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end),
+    awful.key({ modkey,           }, "Tab", function () awful.screen.focus_relative( 1) end),
+    --awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end),
     awful.key({ modkey,           }, "u", awful.client.urgent.jumpto),
-    awful.key({ modkey,           }, "Tab",
-        function ()
-            awful.client.focus.history.previous()
-            if client.focus then
-                client.focus:raise()
-            end
-        end),
+    -- awful.key({ modkey,           }, "Tab",
+    --     function ()
+    --         awful.client.focus.history.previous()
+    --         if client.focus then
+    --             client.focus:raise()
+    --         end
+    --     end),
 
     -- Standard program
     awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
@@ -272,7 +344,7 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
 
-    awful.key({ modkey, "Control" }, "n", awful.client.restore),
+    --awful.key({ modkey, "Control" }, "n", awful.client.restore),
 
     -- Prompt
     awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
@@ -285,7 +357,11 @@ globalkeys = awful.util.table.join(
                   awful.util.getdir("cache") .. "/history_eval")
               end),
     -- Menubar
-    awful.key({ modkey }, "p", function() menubar.show() end)
+    awful.key({ modkey }, "p", function() menubar.show() end),
+ -- Volume
+    awful.key({ }, 'XF86AudioRaiseVolume', function () volumectl("up", volumewidget) end),
+    awful.key({ }, 'XF86AudioLowerVolume', function () volumectl("down", volumewidget) end),
+    awful.key({ }, 'XF86AudioMute', function () volumectl("mute", volumewidget) end)
 )
 
 clientkeys = awful.util.table.join(
@@ -375,10 +451,12 @@ awful.rules.rules = {
                      buttons = clientbuttons } },
     { rule = { class = "mpv" },
       properties = { floating = true } },
+    { rule = { class = "Evince" },
+      properties = { floating = true,tag = tags[2][2] } },
     { rule = { class = "Goldendict" },
       properties = { floating = true },
       callback = function( c )
-                    c:geometry( { width = 800, height = 600 } )
+                    c:geometry( { x = 560, y = 240, width = 800, height = 600 } )
                  end},
     { rule = { class = "gimp" },
       properties = { floating = true } },
@@ -386,13 +464,15 @@ awful.rules.rules = {
     -- { rule = { class = "Firefox" },
     --   properties = { tag = tags[1][2] } },
     { rule = { class = "Code" },
-      properties = { tag = tags[2][1] } },
-    { rule = { class = "Google-chrome" },
-      properties = { tag = tags[2][2] } },
+      properties = { tag = tags[1][2] } },
     { rule = { class = "Gnome-terminal" },
-      properties = { tag = tags[2][3] } },
+      properties = { tag = tags[1][1] } },
     { rule = { class = "Nemo" },
-      properties = { tag = tags[2][4] } },
+      properties = { tag = tags[1][3] } },
+    { rule = { class = "netease-cloud-music" },
+      properties = { tag = tags[1][4] } },
+    { rule = { class = "Google-chrome" },
+      properties = { tag = tags[2][1] } },
 }
 -- }}}
 
