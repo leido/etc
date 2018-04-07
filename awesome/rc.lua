@@ -233,14 +233,16 @@ volumectl("update", volumewidget)
 -- Create a laucher widget and a main menu
 myawesomemenu = {
    { "edit config", editor_cmd .. " " .. awesome.conffile },
-   { "manual", terminal .. " -e man awesome" },
-   { "restart", awesome.restart },
+   --{ "manual", terminal .. " -e man awesome" },
+   { "restart", awesome.restart, '/usr/share/icons/LoginIcons/apps/48/view-refresh.svg' },
    { "quit", awesome.quit }
 }
 
 mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "Debian", debian.menu.Debian_menu.Debian },
-                                    { "open terminal", terminal }
+                                    --{ "Debian", debian.menu.Debian_menu.Debian },
+                                    { "netease", "netease-cloud-music", '/usr/share/icons/hicolor/scalable/apps/netease-cloud-music.svg' },
+                                    { "steam", "steam", '/usr/share/icons/hicolor/16x16/apps/steam.png' },
+                                    { "open terminal", terminal, '/usr/share/icons/Tango/16x16/apps/terminal.png' }
                                   }
                         })
 
@@ -323,7 +325,7 @@ for s = 1, screen.count() do
     mytasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, mytasklist.buttons)
 
     -- Create the wibox
-    mywibox[s] = awful.wibox({ position = "top", screen = s })
+    mywibox[s] = awful.wibox({ position = "top", screen = s})
 
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
