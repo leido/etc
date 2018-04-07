@@ -519,6 +519,8 @@ awful.rules.rules = {
       properties = { floating = true } },
     { rule = { class = "Evince" },
       properties = { floating = true,tag = tags[2][2] } },
+    { rule = { class = "Wps" },
+      properties = { floating = true,tag = tags[2][2] } },
     { rule = { class = "Goldendict" },
       properties = { floating = true },
       callback = function( c )
@@ -536,6 +538,8 @@ awful.rules.rules = {
     { rule = { class = "Nemo" },
       properties = { tag = tags[1][3] } },
     { rule = { class = "netease-cloud-music" },
+      properties = { tag = tags[1][4] } },
+    { rule = { class = "Steam" },
       properties = { tag = tags[1][4] } },
     { rule = { class = "Google-chrome" },
       properties = { tag = tags[2][1] } },
