@@ -65,6 +65,15 @@ if scale ~= 1 then
   awful.util.spawn("xrandr --dpi " .. dpi, false)
 end
 
+-- {{{ Functions
+function get_memory_usage()
+    local ret = {}
+    for l in io.lines('/proc/meminfo') do
+        local k, v = l:match("([^:]+):%s+(%d+)")
+        ret[k] = tonumber(v)
+    end
+    return ret
+end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
@@ -111,6 +120,59 @@ tags = {}
 tags[1] = awful.tag({"shell |", "code |", "nemo |", "fun"}, 1, {layouts[2], layouts[4], layouts[2], layouts[4]})
 tags[2] = awful.tag({"show |", "doc"}, 2, {layouts[4], layouts[4]})
 -- }}}
+
+
+-- {{{ memory usage indicator
+function update_memwidget()
+    local meminfo = get_memory_usage()
+    local free
+    if meminfo.MemAvailable then
+        -- Linux 3.14+
+        free = meminfo.MemAvailable
+    else
+        free = meminfo.MemFree + meminfo.Buffers + meminfo.Cached
+    end
+    local total = meminfo.MemTotal
+    local percent = 100 - math.floor(free / total * 100 + 0.5)
+    memwidget:set_markup('Mem <span color="#90ee90">'.. percent ..'%</span>')
+end
+memwidget = fixwidthtextbox('Mem ??')
+memwidget.width = 65 * scale
+update_memwidget()
+mem_clock = timer({ timeout = 5 })
+mem_clock:connect_signal("timeout", update_memwidget)
+mem_clock:start()
+-- }}}
+
+
+-- {{{ CPU Temperature
+function update_cputemp()
+    local pipe = io.popen('sensors coretemp-isa-0000')
+    if not pipe then
+        cputempwidget:set_markup('CPU <span color="red">ERR</span>℃')
+        return
+    end
+    local temp = 0
+    for line in pipe:lines() do
+        local newtemp = line:match('^Core [^:]+:%s+%+([0-9.]+)°C')
+        if newtemp then
+            newtemp = tonumber(newtemp)
+            if temp < newtemp then
+                temp = newtemp
+            end
+        end
+    end
+    pipe:close()
+    cputempwidget:set_markup('CPU <span color="#008000">'..temp..'</span>℃')
+end
+cputempwidget = fixwidthtextbox('CPU ??℃')
+cputempwidget.width = 60 * scale
+update_cputemp()
+cputemp_clock = timer({ timeout = 5 })
+cputemp_clock:connect_signal("timeout", update_cputemp)
+cputemp_clock:start()
+-- }}}
+
 
 -- {{{ Volume Controller
 function volumectl (mode, widget)
@@ -273,6 +335,8 @@ for s = 1, screen.count() do
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(mytextclock)
+    right_layout:add(memwidget)
+    right_layout:add(cputempwidget)
     right_layout:add(volumewidget)
     right_layout:add(mylayoutbox[s])
 
