@@ -1,6 +1,0 @@
-let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =4
-let g:netrw_dirhist_1='/media/sensetime/bigroom/project/core/build'
-let g:netrw_dirhist_2='/home/sensetime/.oh-my-zsh/custom/plugins'
-let g:netrw_dirhist_3='/home/sensetime/.oh-my-zsh/custom/plugins/zsh-autosuggestions'
-let g:netrw_dirhist_4='/home/sensetime/.oh-my-zsh/custom/plugins/example'

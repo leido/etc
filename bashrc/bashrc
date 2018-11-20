@@ -126,13 +126,6 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 export PATH=/usr/local/cuda/bin:$PATH
 export PATH=/usr/games/:$PATH
 
-# added by Miniconda3 installer
-# export PATH="/home/sensetime/miniconda3/bin:$PATH"
-
-# added by Miniconda2 installer
-export PATH="~/bin:$PATH"
-# export PATH="/home/sensetime/miniconda2/bin:$PATH"
-# export PYTHONPATH="/home/sensetime/miniconda2/envs/ads2/lib/python2.7/site-packages:/home/sensetime/project/core/python"
 
 
 source "$HOME/.vim/bundle/gruvbox/gruvbox_256palette.sh"

@@ -120,10 +120,6 @@ vmap <leader>c "+y
 
 
 
-" nerdcommenter
-let g:NERDSpaceDelims = 1
-let g:NERDCompactSexyComs = 1
-
 
 nnoremap <F5> :!python %<cr>
 
